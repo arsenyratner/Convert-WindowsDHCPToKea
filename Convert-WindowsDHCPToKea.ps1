@@ -19,6 +19,7 @@ switch ($split) {
 }
 # write-host "split: $split scopes: `$$plit_subnets reservations: `$$split_reservations"
 function Convert-Subnetmask {
+# конвертит маску подсети из 255.255.255.0 в /24
     [CmdLetBinding(DefaultParameterSetName='CIDR')]
     param( 
         [Parameter(ParameterSetName='CIDR',Position=0,Mandatory=$true,
@@ -61,6 +62,9 @@ function Convert-Subnetmask {
     End {}
 }
 function IncreaseIP {
+# изменяет адрес на значение в inc
+# ip=192.168.126.134 inc=-1 result=192.168.126.133
+# ip=192.168.126.170 inc=1 result=192.168.126.171
     Param
     (
          [Parameter(Mandatory=$true, Position=0)]
@@ -76,6 +80,7 @@ function IncreaseIP {
     Return $tmpIP
 }
 function Convert-Pools {
+# конвертирует диапазоны исключений в пулы без адресов из диапазонов
     Param (
         [Parameter(Mandatory=$true, Position=0)][string]$ScopeStartRange,
         [Parameter(Mandatory=$true, Position=1)][string]$ScopeEndRange,
@@ -115,6 +120,7 @@ function Convert-LeaseDuration {
     return  $result
 }
 function Convert-Options {
+# конвертирует опции по списку
     param(
         [Parameter(Mandatory=$true, Position=0)][array]$Options
     )
@@ -177,6 +183,7 @@ function Convert-Reservations {
     return  $reservations_list
 }
 function Convert-Scope {
+# конвертирует scope в subnet4
     param(
         [Parameter(Mandatory=$true, Position=0)]$scope
     )
@@ -256,14 +263,14 @@ if ($keadhcp4.Dhcp4.'option-data') {
 } else {
     $keadhcp4.Dhcp4 | Add-Member -MemberType NoteProperty -Name "option-data" -Value $dhcp4_optiondata
 }
-
+# подсети dhcp4.subnet4
 $dhcp4_subnet4 = (Convert-Scopes -Scopes $win_dhcpconfig.DHCPServer.IPv4.Scopes.Scope)
 if ($keadhcp4.Dhcp4.Subnet4) {
     $keadhcp4.Dhcp4.Subnet4 += $dhcp4_subnet4
 } else {
     $keadhcp4.Dhcp4 | Add-Member -MemberType NoteProperty -Name "Subnet4" -Value $dhcp4_subnet4
 }
-
+# сохраним dhcp4.option-data в отдельный файл
 if ($split_options) {
     # $dhcp4_optiondata = @()
     # $dhcp4_optiondata += (Convert-Options -Options $win_dhcpconfig.DHCPServer.IPv4.OptionValues.OptionValue)
@@ -271,7 +278,8 @@ if ($split_options) {
     ConvertTo-Json -InputObject $keadhcp4.Dhcp4.'option-data' -Depth 10 | ForEach-Object { [regex]::Unescape($_) } | Foreach-Object {$_ -replace '"<','<'} | Foreach-Object {$_ -replace '>"','>'} | %{ $_.Replace("`r`n","`n") } | Out-File -Encoding ascii "$($out_confd)\$($options_file)"
     $keadhcp4.Dhcp4.'option-data' = "<?include `"$($kea_confd)/$($options_file)`"?>"
 }
-
+# сохраним каждую подсеть в отдельный файл
+# dhcp4.subnet4
 if ($split_subnets) {
     [Collections.ArrayList]$dhcp4_subnet4 = @()
     # каждую подсеть в свой файл
