@@ -1,0 +1,264 @@
+{
+  "dhcp4": {
+    "boot-file-name": "pxelinux.0",
+    "calculate-tee-times": true,
+    "client-classes": [
+      {
+        "boot-file-name": "pxelinux.0",
+        "name": "PXE",
+        "next-server": "10.3.79.10",
+        "option-data": [
+          {
+            "csv-format": true,
+            "data": "PXEClient",
+            "name": "vendor-class-identifier"
+          }
+        ],
+        "test": "substring(option[vendor-class-identifier].text, 0, 9) == 'PXEClient'"
+      }
+    ],
+    "control-socket": {
+      "socket-name": "/run/kea/kea-dhcp4.sock",
+      "socket-type": "unix"
+    },
+    "hooks-libraries": [
+      {"library": "/usr/lib64/kea/hooks/libdhcp_lease_cmds.so"},
+      {
+        "library": "/usr/lib64/kea/hooks/libdhcp_run_script.so",
+        "parameters": {"name": "/usr/local/bin/kea-script.sh", "sync": false}
+      },
+      {
+        "library": "/usr/lib64/kea/hooks/libdhcp_ha.so",
+        "parameters": {
+          "high-availability": [
+            {
+              "heartbeat-delay": 10000,
+              "max-ack-delay": 5000,
+              "max-rejected-lease-updates": 0,
+              "max-response-delay": 60000,
+              "max-unacked-clients": 0,
+              "mode": "hot-standby",
+              "multi-threading": {
+                "enable-multi-threading": true,
+                "http-client-threads": 4,
+                "http-dedicated-listener": true,
+                "http-listener-threads": 4
+              },
+              "peers": [
+                {
+                  "auto-failover": true,
+                  "name": "admdhcp1",
+                  "role": "primary",
+                  "url": "http://10.3.79.6:8001/"
+                },
+                {
+                  "auto-failover": true,
+                  "name": "admdhcp2",
+                  "role": "standby",
+                  "url": "http://10.3.79.7:8001/"
+                }
+              ],
+              "send-lease-updates": true,
+              "sync-leases": true,
+              "sync-page-limit": 10000,
+              "this-server-name": "admdhcp1"
+            }
+          ]
+        }
+      }
+    ],
+    "interfaces-config": {"interfaces": ["eth0"]},
+    "lease-database": {
+      "lfc-interval": 10000,
+      "name": "/var/lib/kea/kea-leases4.csv",
+      "persist": true,
+      "type": "memfile"
+    },
+    "loggers": [
+      {
+        "debuglevel": 0,
+        "name": "kea-dhcp4",
+        "output_options": [{"output": "/var/log/kea/kea-dhcp4.log"}],
+        "severity": "INFO"
+      },
+      {
+        "name": "kea-dhcp4.dhcpsrv",
+        "output_options": [
+          {"maxver": 9, "output": "/var/log/kea/dhcp4-dhcpsrv.log"}
+        ],
+        "severity": "INFO"
+      },
+      {
+        "name": "kea-dhcp4.leases",
+        "output_options": [
+          {"maxver": 9, "output": "/var/log/kea/dhcp4-leases.log"}
+        ],
+        "severity": "INFO"
+      },
+      {
+        "name": "kea-dhcp4.ha-hooks",
+        "output_options": [
+          {"maxver": 9, "output": "/var/log/kea/dhcp4-ha-hooks.log"}
+        ],
+        "severity": "INFO"
+      },
+      {
+        "name": "kea-dhcp4.commands",
+        "output_options": [
+          {"maxver": 9, "output": "/var/log/kea/dhcp4-commands.log"}
+        ],
+        "severity": "INFO"
+      },
+      {
+        "name": "kea-dhcp4.dhcp4",
+        "output_options": [
+          {"maxver": 9, "output": "/var/log/kea/dhcp4-dhcp4.log"}
+        ],
+        "severity": "INFO"
+      },
+      {
+        "name": "kea-dhcp4.hooks",
+        "output_options": [
+          {"maxver": 9, "output": "/var/log/kea/dhcp4-hooks.log"}
+        ],
+        "severity": "INFO"
+      },
+      {
+        "name": "kea-dhcp4.alloc-engine",
+        "output_options": [
+          {"maxver": 9, "output": "/var/log/kea/dhcp4-alloc-engine.log"}
+        ],
+        "severity": "INFO"
+      },
+      {
+        "name": "kea-dhcp4.commands",
+        "output_options": [
+          {"maxver": 9, "output": "/var/log/kea/dhcp4-commands.log"}
+        ],
+        "severity": "INFO"
+      }
+    ],
+    "max-valid-lifetime": 8000,
+    "min-valid-lifetime": 4000,
+    "next-server": "10.3.79.10",
+    "option-data": [
+        {
+          "csv-format": true,
+          "name": "domain-name-servers",
+          "code": 6,
+          "data": "10.3.77.112,10.3.77.113",
+          "space": "dhcp4",
+          "always-send": true
+        },
+        {
+          "csv-format": true,
+          "name": "domain-name",
+          "code": 15,
+          "data": "gtm.gazprom.ru",
+          "space": "dhcp4",
+          "always-send": true
+        },
+        {
+          "csv-format": true,
+          "name": "tftp-server-name",
+          "code": 66,
+          "data": "10.3.11.56",
+          "space": "dhcp4",
+          "always-send": true
+        },
+        {
+          "csv-format": true,
+          "name": "boot-file-name",
+          "code": 67,
+          "data": "iventoy_loader_16000_uefi",
+          "space": "dhcp4",
+          "always-send": true
+        }
+      ],
+    "reservations-global": false,
+    "reservations-in-subnet": true,
+    "reservations-out-of-pool": false,
+    "subnet4": [
+      {
+        "id": 790,
+        "option-data": [{"data": "10.3.79.254", "name": "routers"}],
+        "pools": [{"pool": "10.3.79.50 - 10.3.79.254"}],
+        "reservations": [
+          {
+            "hostname": "admrsat1",
+            "hw-address": "56:6f:6a:30:00:30",
+            "ip-address": "10.3.79.30"
+          },
+          {
+            "hostname": "admrep1",
+            "hw-address": "56:6f:6a:30:00:10",
+            "ip-address": "10.3.79.10"
+          },
+          {
+            "hostname": "admdc1",
+            "hw-address": "56:6f:6a:30:00:11",
+            "ip-address": "10.3.79.11"
+          },
+          {
+            "hostname": "admdc2",
+            "hw-address": "56:6f:6a:30:00:12",
+            "ip-address": "10.3.79.12"
+          },
+          {
+            "hostname": "admdhcp1",
+            "hw-address": "56:6f:6a:30:00:06",
+            "ip-address": "10.3.79.6"
+          },
+          {
+            "hostname": "admdhcp2",
+            "hw-address": "56:6f:6a:30:00:07",
+            "ip-address": "10.3.79.7"
+          },
+          {
+            "hostname": "admpki1",
+            "hw-address": "56:6f:6a:30:00:08",
+            "ip-address": "10.3.79.8"
+          },
+          {
+            "hostname": "admca1",
+            "hw-address": "56:6f:6a:30:00:09",
+            "ip-address": "10.3.79.9"
+          },
+          {
+            "hostname": "admmng1",
+            "hw-address": "56:6f:6a:30:00:13",
+            "ip-address": "10.3.79.13"
+          },
+          {
+            "hostname": "admfs1",
+            "hw-address": "56:6f:6a:30:00:14",
+            "ip-address": "10.3.79.14"
+          },
+          {
+            "hostname": "admps1",
+            "hw-address": "56:6f:6a:30:00:15",
+            "ip-address": "10.3.79.15"
+          },
+          {
+            "hostname": "admos1",
+            "hw-address": "56:6f:6a:30:00:22",
+            "ip-address": "10.3.79.22"
+          },
+          {
+            "hostname": "admmon1",
+            "hw-address": "56:6f:6a:30:00:23",
+            "ip-address": "10.3.79.23"
+          },
+          {
+            "hostname": "admstork1",
+            "hw-address": "56:6f:6a:30:00:24",
+            "ip-address": "10.3.79.24"
+          }
+        ],
+        "subnet": "10.3.79.0/24",
+        "user-context": {"description": "ADM 3 79 segment"}
+      }
+    ],
+    "valid-lifetime": 6000
+  }
+}
