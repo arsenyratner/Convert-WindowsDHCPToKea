@@ -4,10 +4,10 @@ param (
     $out_confdir = ".\kea",                   # куда сохранить конвертированный конфиг /etc/kea
     $split  = "none",                          # поместить в отдельный файл конфигурации subnets, options, reservations в папку /etc/kea/conf.d
     $out_dhcp4_conf = "$($out_confdir)\kea-dhcp4.conf.json",
-    $out_confd = "$($out_confdir)\conf.d",
-    $kea_confdir    = "/etc/kea",
-    $kea_confd = "$($kea_confdir)/conf.d"
+    $out_confd = "$($out_confdir)\conf.d"
 )
+# значение для путей в файле конфигурации
+$kea_confd = "/etc/kea/conf.d"
 
 switch ($split) {
     "subnets"      { $split_subnets = $true;  $split_reservations = $false; $split_options = $false; break }
